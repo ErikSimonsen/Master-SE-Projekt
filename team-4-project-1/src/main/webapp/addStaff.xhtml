@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
+<h:head>
+</h:head>
+<h:body>
+    <ui:composition template="WEB-INF/template/template.xhtml">
+        <f:metadata>
+            <f:viewAction action="#{sessionBean.checkForLogin()}"/>
+            <f:viewAction action="#{sessionBean.checkForStoreOwner()}"/>
+        </f:metadata>
+        <ui:define name="head">
+            <ui:include src="WEB-INF/template/head.xhtml"/>
+            <ui:include src="WEB-INF/template/head-list-views.xhtml"/>
+        </ui:define>
+        <ui:define name="content">
+            <main>
+                <h3>Neuen Mitarbeiter hinzufügen</h3>
+                <h:form enctype="multipart/form-data">
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="Vorname: " for="firstName"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="firstName" p:required="true" required="true"
+                                         value="#{addStaffBean.staff.firstName}"
+                                         requiredMessage="Bitte Vorname angeben!"/>
+                            <h:message for="firstName" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Nachname: " for="lastName"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="lastName" p:required="true" required="true"
+                                         value="#{addStaffBean.staff.lastName}"
+                                         requiredMessage="Bitte Nachname angeben!"/>
+                            <h:message for="lastName" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Email: " for="email"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="email" p:required="true" p:type="email" required="true"
+                                         value="#{addStaffBean.staff.email}"
+                                         requiredMessage="Bitte Email angeben!"/>
+                            <h:message for="email" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Adresse: " for="address"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="address" p:required="true" required="true"
+                                         value="#{addStaffBean.staff.address.address}"
+                                         requiredMessage="Bitte Adresse angeben!"/>
+                            <h:message for="address" styleClass="validation-error"/>
+                        </h:panelGrid>
+
+                        <h:outputLabel value="Stadt: " for="city"/>
+                        <h:panelGrid columns="1">
+                            <h:selectOneMenu id="city" p:required="true" required="true" converter="cityConverter"
+                                             requiredMessage="Bitte wählen Sie eine Stadt aus der Liste"
+                                             value="#{addStaffBean.staff.address.city}">
+                                <f:selectItem itemLabel="Bitte auswählen" itemValue="#{null}"/>
+                                <f:selectItems value="#{cityRepository.all}" var="city" itemValue="#{city}"
+                                               itemLabel="#{city.city}"/>
+                            </h:selectOneMenu>
+                        </h:panelGrid>
+
+                        <h:outputLabel value="District: " for="district"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="district" p:required="true" required="true"
+                                         value="#{addStaffBean.staff.address.district}"
+                                         requiredMessage="Bitte District angeben!"/>
+                            <h:message for="district" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Postleitzahl: " for="postalCode"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="postalCode" p:required="true" required="true"
+                                         value="#{addStaffBean.staff.address.postalCode}"
+                                         requiredMessage="Bitte Postleitzahl angeben!"/>
+                            <h:message for="postalCode" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Telefonnummer: " for="phoneNumber"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="phoneNumber" p:required="true" required="true"
+                                         value="#{addStaffBean.staff.address.phone}"
+                                         requiredMessage="Bitte Telefonnummer angeben!"/>
+                            <h:message for="phoneNumber" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Filiale: " for="store"/>
+                        <h:panelGrid columns="1">
+                            <h:selectOneMenu id="store" p:required="true" required="true" converter="storeConverter"
+                                             value="#{addStaffBean.staff.store}"
+                                             requiredMessage="Bitte Filiale angeben!"
+                                             converterMessage="Fehler beim Konvertieren">
+                                <f:selectItems value="#{storeRepository.all}" var="store"
+                                               itemLabel="#{store.storeId}" itemValue="#{store}"/>
+                            </h:selectOneMenu>
+                            <h:message for="store" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Aktiviert: " for="store"/>
+                        <h:panelGrid columns="1">
+                            <h:selectBooleanCheckbox id="active"
+                                                     value="#{addStaffBean.staff.active}"/>
+                            <h:message for="active" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Benutzername: " for="username"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="username" p:required="true" required="true"
+                                         value="#{addStaffBean.staff.username}"
+                                         requiredMessage="Bitte Benutzername angeben!"/>
+                            <h:message for="username" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Passwort: " for="password"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="password" p:required="true" p:type="password" required="true"
+                                         value="#{addStaffBean.staff.password}"
+                                         requiredMessage="Bitte Passwort angeben!"/>
+                            <h:message for="password" styleClass="validation-error"/>
+                        </h:panelGrid>
+                    </h:panelGrid>
+                    <h:commandButton value="Speichern" action="#{addStaffBean.save()}"/>
+                </h:form>
+            </main>
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>

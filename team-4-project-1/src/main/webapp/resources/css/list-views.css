@@ -1,0 +1,49 @@
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+
+select {
+    min-width: 100px;
+}
+
+main {
+    width: 1400px;
+    margin: auto;
+}
+
+div#filter {
+    justify-content: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+div#filter div {
+    margin-right: 10px;
+}
+
+div#filter-loading {
+    display: none;
+}
+
+div#filter-loading img {
+    padding-top: 5px;
+}
+
+div#scrollable-container {
+    max-height: 720px;
+    overflow-y: scroll;
+}
+
+table thead, table thead a {
+    color: #171717;
+}
+
+table {
+    width: 100%;
+}
+
+a.actionImg {
+    margin-left: 4px;
+}

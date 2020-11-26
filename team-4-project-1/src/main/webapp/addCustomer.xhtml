@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
+<h:head>
+</h:head>
+<h:body>
+    <ui:composition template="WEB-INF/template/template.xhtml">
+        <f:metadata>
+            <f:viewAction action="#{sessionBean.checkForLogin()}"/>
+        </f:metadata>
+        <ui:define name="head">
+            <ui:include src="WEB-INF/template/head.xhtml"/>
+            <ui:include src="WEB-INF/template/head-list-views.xhtml"/>
+        </ui:define>
+        <ui:define name="content">
+            <main>
+                <h3>Neuen Kunden hinzufügen</h3>
+                <h:form>
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="Vorname: " for="firstName"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="firstName" p:required="true" required="true"
+                                         value="#{addCustomerBean.customer.firstName}"
+                                         requiredMessage="Bitte Vorname angeben!"/>
+                            <h:message for="firstName" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Nachname: " for="lastName"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="lastName" p:required="true" required="true"
+                                         value="#{addCustomerBean.customer.lastName}"
+                                         requiredMessage="Bitte Nachname angeben!"/>
+                            <h:message for="lastName" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Email: " for="email"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="email" p:required="true" p:type="email" required="true"
+                                         value="#{addCustomerBean.customer.email}"
+                                         requiredMessage="Bitte Email angeben!"/>
+                            <h:message for="email" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Adresse: " for="address"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="address" p:required="true" required="true"
+                                         value="#{addCustomerBean.customer.address.address}"
+                                         requiredMessage="Bitte Adresse angeben!"/>
+                            <h:message for="address" styleClass="validation-error"/>
+                        </h:panelGrid>
+
+                        <h:outputLabel value="Stadt: " for="city"/>
+                        <h:panelGrid columns="1">
+                            <h:selectOneMenu id="city" p:required="true" required="true" converter="cityConverter"
+                                             requiredMessage="Bitte wählen Sie eine Stadt aus der Liste"
+                                             value="#{addCustomerBean.customer.address.city}">
+                                <f:selectItem itemLabel="Bitte auswählen" itemValue="#{null}"/>
+                                <f:selectItems value="#{cityRepository.all}" var="city" itemValue="#{city}"
+                                               itemLabel="#{city.city}"/>
+                            </h:selectOneMenu>
+                        </h:panelGrid>
+
+                        <h:outputLabel value="District: " for="district"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="district" p:required="true" required="true"
+                                         value="#{addCustomerBean.customer.address.district}"
+                                         requiredMessage="Bitte District angeben!"/>
+                            <h:message for="district" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Postleitzahl: " for="postalCode"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="postalCode" p:required="true" required="true"
+                                         value="#{addCustomerBean.customer.address.postalCode}"
+                                         requiredMessage="Bitte Postleitzahl angeben!"/>
+                            <h:message for="postalCode" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Telefonnummer: " for="phoneNumber"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="phoneNumber" p:required="true" required="true"
+                                         value="#{addCustomerBean.customer.address.phone}"
+                                         requiredMessage="Bitte Telefonnummer angeben!"/>
+                            <h:message for="phoneNumber" styleClass="validation-error"/>
+                        </h:panelGrid>
+                    </h:panelGrid>
+                    <h:commandButton value="Speichern" action="#{addCustomerBean.saveCustomer}"/>
+                </h:form>
+            </main>
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>

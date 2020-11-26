@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://xmlns.jcp.org/jsf/passthrough"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+</h:head>
+<h:body>
+    <ui:composition template="/WEB-INF/template/template.xhtml">
+        <f:metadata>
+            <f:viewAction action="#{sessionBean.checkForLogin()}"/>
+            <f:viewParam name="customerId" value="#{selectFilmsBean.customerId}" />
+            <f:viewAction action="#{selectFilmsBean.loadCustomer()}"/>
+        </f:metadata>
+        <ui:define name="head">
+            <ui:include src="WEB-INF/template/head.xhtml"/>
+            <ui:include src="WEB-INF/template/head-list-views.xhtml"/>
+        </ui:define>
+
+        <ui:define name="content">
+            <main>
+                <h3>Kunde #{selectFilmsBean.customer.firstName} #{selectFilmsBean.customer.lastName} - Filmausleihen</h3>
+                <h:form id="filter-form">
+                    <div id="filter" class="flex-row-container">
+                        <div>
+                            <h:commandButton styleClass="height-100" id="rentFilms" value="Film(e) ausleihen"
+                                             action="#{selectFilmsBean.rentSelectedFilms}"
+                                             disabled="#{selectFilmsBean.isNoFilmSelected()}"/>
+                        </div>
+                    </div>
+                </h:form>
+                <h:form id="films-form">
+                    <div id="scrollable-container">
+                        <h:dataTable var="film" styleClass="scroll" value="#{selectFilmsBean.films}"
+                                     id="filmTable">
+                            <h:column>
+                                <f:facet name="header">
+                                    Film Nr.
+                                </f:facet>
+                                #{film.id}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Titel
+                                </f:facet>
+                                #{film.title}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Erscheinungsjahr
+                                </f:facet>
+                                #{film.releaseYear}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Länge
+                                </f:facet>
+                                #{film.length}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Bewertung
+                                </f:facet>
+                                #{film.rating}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Leihdauer (Tage)
+                                </f:facet>
+                                #{film.rentalDuration}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Leihrate
+                                </f:facet>
+                                #{film.rentalRate}$
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Wiederbeschaffungskosten
+                                </f:facet>
+                                #{film.replacementCost}$
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Bereits ausgeliehen</f:facet>
+                                #{selectFilmsBean.getStatusText(film)}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Film auswählen</f:facet>
+                                <h:selectBooleanCheckbox value="#{selectFilmsBean.filmToSelected[film]}"
+                                                         disabled="#{!selectFilmsBean.isFilmAvailable(film)}">
+                                    <f:ajax listener="#{selectFilmsBean.selectFilm(film)}"
+                                            render="@all"/>
+                                    <f:param name="customerId" value="#{customerRentalsBean.customerId}" />
+                                </h:selectBooleanCheckbox>
+                            </h:column>
+                        </h:dataTable>
+                    </div>
+
+                    <h:selectOneMenu id="page-select" value="#{selectFilmsBean.currentPage}" converter="javax.faces.Integer">
+                        <f:selectItems value="#{selectFilmsBean.pages}"/>
+                        <!--render whole form, so that the command buttons are rendered too (because they are not in the data table)-->
+                        <f:ajax listener="#{selectFilmsBean.refreshFilms}" render="films-form"/>
+                    </h:selectOneMenu>
+                </h:form>
+            </main>
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>

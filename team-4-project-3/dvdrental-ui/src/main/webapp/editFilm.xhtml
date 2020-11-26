@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
+<h:head>
+</h:head>
+<h:body>
+    <ui:composition template="WEB-INF/template/template.xhtml">
+        <f:metadata>
+            <f:viewAction action="#{sessionBean.checkForLogin()}"/>
+            <f:viewParam name="filmId" value="#{editFilmBean.filmUrlId}"
+                         required="false" requiredMessage="Sie müssen eine Filnummmer angeben"
+                         converter="javax.faces.Integer"/>
+            <f:viewAction action="#{editFilmBean.loadFilm()}"/>
+        </f:metadata>
+        <ui:define name="head">
+            <ui:include src="WEB-INF/template/head.xhtml"/>
+            <ui:include src="WEB-INF/template/head-list-views.xhtml"/>
+            <h:outputStylesheet library="css" name="edit-film.css"/>
+        </ui:define>
+        <ui:define name="content">
+            <main>
+                <h3>Kategorien und Schauspieler von Film #{editFilmBean.film.title} hinzufügen</h3>
+                <h:form>
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="Kategorie: " for="category"/>
+                        <h:panelGrid columns="1">
+                            <h:selectManyListbox id="category" value="#{editFilmBean.film.categories}"
+                                             required="true"
+                                             p:required="true" requiredMessage="Bitte eine Kategorie auswählen">
+                                <f:selectItems value="#{filmClient.allCategories}" var="category"
+                                               itemValue="#{category}" itemLabel="#{category}"/>
+                            </h:selectManyListbox>
+                        </h:panelGrid>
+                        <h:outputLabel value="Schauspieler: " for="actors"/>
+                        <h:panelGrid columns="1">
+                            <h:selectManyListbox id="actors" value="#{editFilmBean.actors}" required="true"
+                                              p:required="true"
+                                              requiredMessage="Bitte mindestens einen Schauspieler auswählen"
+                                              converter="actorConverter">
+                                <f:selectItems value="#{filmClient.allActors}" var="actor"
+                                               itemValue="#{actor}" itemLabel="#{actor.firstName} #{actor.lastName}"/>
+                            </h:selectManyListbox>
+                        </h:panelGrid>
+                    </h:panelGrid>
+                    <h:commandButton value="Speichern" action="#{editFilmBean.update()}"/>
+                </h:form>
+            </main>
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>

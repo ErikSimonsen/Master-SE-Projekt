@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+</h:head>
+<h:body>
+    <ui:composition template="WEB-INF/template/template.xhtml">
+        <f:metadata>
+            <f:viewAction action="#{sessionBean.checkForLogin()}"/>
+            <f:viewParam name="customerid" value="#{customerRentalsBean.customerIdUrlParameter}" />
+            <f:viewAction action="#{customerRentalsBean.loadUrlParameters}"/>
+        </f:metadata>
+        <ui:define name="head">
+            <ui:include src="WEB-INF/template/head.xhtml"/>
+            <ui:include src="WEB-INF/template/head-list-views.xhtml"/>
+        </ui:define>
+        <ui:define name="content">
+            <main>
+                <h3><h:outputText value="Bestehende Ausleihen für Kunde #{customerRentalsBean.customer.firstName} #{customerRentalsBean.customer.lastName}"/></h3>
+                <h:form>
+                    <h3>
+                        <h:panelGrid columns="1">
+                            <h:outputText
+                                    value="Ausstehende Zahlungen: #{customerRentalsService.getOverallCostsLeftToPay(customerRentalsBean.rentals)}$"/>
+                            <h:outputText value="Offene Ausleihen: #{customerRepository.getNumOpenRentals(customerRentalsBean.customer)}"/>
+                        </h:panelGrid>
+                    </h3>
+                    <div id="scrollable-container">
+                        <h:dataTable var="rental" styleClass="scroll" value="#{customerRentalsBean.rentals}">
+                            <h:column>
+                                <f:facet name="header">Film ID</f:facet>
+                                #{rental.inventory.film.filmId}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Film Titel</f:facet>
+                                #{rental.inventory.film.title}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Film Ausleihdauer</f:facet>
+                                #{rental.inventory.film.rentalDuration}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Rental ID</f:facet>
+                                #{rental.rentalId}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Ausleihdatum</f:facet>
+                                <h:outputText value="#{rental.rentalDate}">
+                                    <f:convertDateTime type="both"/>
+                                </h:outputText>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Zurückgegeben</f:facet>
+                                <h:outputText value="#{rental.returnDate}"
+                                              rendered="#{rental.returnDate != null}">
+                                    <f:convertDateTime type="both"/>
+                                </h:outputText>
+                                <h:outputText styleClass="validation-error" value="-----------"
+                                              rendered="#{rental.returnDate == null}"/>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Filmpreis</f:facet>
+                                #{rental.inventory.film.rentalRate}$
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Mahngebühren</f:facet>
+                                #{customerRentalsService.getLimitedFine(rental)}$
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Soll bezahlen</f:facet>
+                                #{customerRentalsService.getCosts(rental)}$
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Ist bezahlt</f:facet>
+                                #{customerRentalsService.getCostsPaid(rental)}$
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Alles bezahlt</f:facet>
+                                <h:graphicImage library="images" name="ok-48.png" width="28" height="28"
+                                                rendered="#{customerRentalsService.isPaid(rental)}"/>
+                                <h:graphicImage library="images" name="stornieren-48.png" width="28" height="28"
+                                                rendered="#{!customerRentalsService.isPaid(rental)}"/>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Aktion</f:facet>
+                                <h:commandButton value="#{customerRentalsBean.getActionButtonText(rental)}"
+                                                 rendered="#{!customerRentalsService.isPaid(rental) || rental.returnDate == null}"
+                                                 action="#{customerRentalsBean.returnFilmAndPayCosts(rental)}">
+                                    <f:ajax render="@form"/>
+                                </h:commandButton>
+                            </h:column>
+                        </h:dataTable>
+                    </div>
+                </h:form>
+            </main>
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>

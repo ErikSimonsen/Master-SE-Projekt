@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<h:head>
+    <title>Title</title>
+</h:head>
+
+<h:body>
+    <ui:composition>
+        <header id="header-bar" class="width-100">
+            <nav class="menu">
+                <div>
+                    <h:link value="Ausleihen" outcome="rentals?faces-redirect=true"
+                            rendered="#{sessionBean.getCustomerClientAvailable() and sessionBean.getFilmClientAvailable()}"/>
+                </div>
+                <div class="dropdown">
+                    <div class="dropdown-hint">
+                        <h:link value="Filme" outcome="films?faces-redirect=true"
+                                rendered="#{sessionBean.getFilmClientAvailable()}"/>
+                    </div>
+                    <div class="dropdown-content">
+                        <div>
+                            <h:link value="Neuer Film" outcome="addFilm?faces-redirect=true"
+                                    rendered="#{sessionBean.getFilmClientAvailable()}"/>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="dropdown">
+                        <div class="dropdown-hint">
+                            <h:link value="Kunden" outcome="customers?faces-redirect=true"
+                                    rendered="#{sessionBean.getCustomerClientAvailable()}"/>
+                        </div>
+                        <div class="dropdown-content">
+                            <div>
+                                <h:link value="Neuer Kunde" outcome="addCustomer?faces-redirect=true"
+                                        rendered="#{sessionBean.getCustomerClientAvailable()}"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="dropdown">
+                        <div class="dropdown-hint">
+                            <h:link value="Mitarbeiter" outcome="staffs?faces-redirect=true"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <div class="dropdown-hint">
+                        <a>Hallo #{sessionBean.activeStaff.firstName}</a>
+                        <h:graphicImage library="images" height="20" width="20"
+                                        name="quadrat-runter-48.png"/>
+                    </div>
+                    <div class="dropdown-content">
+                        <div>
+                            <h:form>
+                                <!--Executes the logout, then navigates to the login with faces-redirect=true (otherwise the <f:viewAction> would not get triggered.
+                                The <f:viewAction> then redirects to the login page because there is logged in user-->
+                                <h:commandLink action="login?faces-redirect=true"
+                                               actionListener="#{sessionBean.logOut()}" value="Ausloggen"/>
+                            </h:form>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+    </ui:composition>
+</h:body>
+</html>

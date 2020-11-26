@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
+<h:head>
+</h:head>
+<h:body>
+    <ui:composition template="WEB-INF/template/template.xhtml">
+        <f:metadata>
+            <f:viewAction action="#{sessionBean.checkForLogin()}"/>
+        </f:metadata>
+        <ui:define name="head">
+            <ui:include src="WEB-INF/template/head.xhtml"/>
+            <ui:include src="WEB-INF/template/head-list-views.xhtml"/>
+            <h:outputStylesheet library="css" name="addFilm.css"/>
+        </ui:define>
+        <ui:define name="content">
+            <main>
+                <h3>Neuen Film hinzufügen</h3>
+                <h:form>
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="Titel: " for="titel"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="titel" p:required="true" p:minlength="3" required="true"
+                                         value="#{addFilmBean.film.title}"
+                                         requiredMessage="Bitte Titel angeben!"/>
+                            <h:message for="titel" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Beschreibung: " for="description"/>
+                        <h:panelGrid columns="1">
+                            <h:inputTextarea id="description" p:required="true" p:minlength="3" required="true"
+                                             value="#{addFilmBean.film.description}"
+                                             requiredMessage="Bitte Beschreibung angeben!"/>
+                            <h:message for="description" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Erscheinungsjahr: " for="releaseYear"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="releaseYear" p:required="true" p:type="number" p:min="0" required="true"
+                                         value="#{addFilmBean.film.releaseYear}" converter="yearConverter"
+                                         requiredMessage="Bitte Erscheinungsjahr angeben!"/>
+                            <h:message for="releaseYear" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Sprache: " for="language"/>
+                        <h:panelGrid columns="1">
+                            <h:selectOneMenu id="language" p:required="true" required="true" converter="languageConverter"
+                                             requiredMessage="Bitte wählen Sie eine Sprache aus der Liste"
+                                             value="#{addFilmBean.film.language}">
+                                <f:selectItem itemLabel="Bitte auswählen" itemValue="#{null}"/>
+                                <f:selectItems value="#{languageRepository.all}" var="language" itemValue="#{language}"
+                                               itemLabel="#{language.name}"/>
+                            </h:selectOneMenu>
+                        </h:panelGrid>
+                        <h:outputLabel value="Rating: " for="rating"/>
+                        <h:panelGrid columns="1">
+                            <h:selectOneMenu id="rating" p:required="true" required="true"
+                                             requiredMessage="Bitte wählen Sie ein Rating aus der Liste"
+                                             value="#{addFilmBean.film.rating}">
+                                <f:selectItem itemLabel="Bitte auswählen" value="#{null}"/>
+                                <f:selectItems value="#{addFilmBean.ratings}"/>
+                            </h:selectOneMenu>
+                        </h:panelGrid>
+                        <h:outputLabel value="Länge (in Minuten): " for="length"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="length" p:required="true" p:type="number" p:min="45" required="true"
+                                         value="#{addFilmBean.film.length}"
+                                         requiredMessage="Bitte Länge angeben!"/>
+                            <h:message for="length" styleClass="validation-error"/>
+                        </h:panelGrid>
+
+                        <h:outputLabel value="Kategorie: " for="category"/>
+                        <h:panelGrid columns="1">
+                            <h:selectOneMenu id="category" p:required="true" required="true" converter="categoryConverter"
+                                             requiredMessage="Bitte wählen Sie eine Kategorie aus der Liste!"
+                                             value="#{addFilmBean.film.category}">
+                                <f:selectItem itemLabel="Bitte auswählen" itemValue="#{null}"/>
+                                <f:selectItems value="#{categoryRepository.all}" var="category" itemValue="#{category}"
+                                               itemLabel="#{category.name}"/>
+                            </h:selectOneMenu>
+
+                        </h:panelGrid>
+
+                        <h:outputLabel value="Ausleihdauer (Tage): " for="rentalDuration"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="rentalDuration" p:required="true" p:type="number" p:min="3" required="true"
+                                         value="#{addFilmBean.film.rentalDuration}"
+                                         requiredMessage="Bitte Ausleihdauer angeben!"
+                                         converter="javax.faces.Short">
+                            </h:inputText>
+                            <h:message for="rentalDuration" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Preis ($): " for="rentalRate"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="rentalRate" p:type="number" p:step="0.01" p:min="0"
+                                         p:required="true" required="true"
+                                         value="#{addFilmBean.film.rentalRate}"
+                                         requiredMessage="Bitte Preis angeben!"
+                                         converter="javax.faces.BigDecimal"/>
+                            <h:message for="rentalRate" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Erstattungskosten ($): " for="replacementCosts"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="replacementCosts" p:type="number" p:step="0.01" p:min="0"
+                                         p:required="true" required="true"
+                                         value="#{addFilmBean.film.replacementCost}"
+                                         requiredMessage="Bitte Erstattungskosten angeben!"
+                                         converter="javax.faces.BigDecimal"/>
+                            <h:message for="replacementCosts" styleClass="validation-error"/>
+                        </h:panelGrid>
+                    </h:panelGrid>
+
+                    <h:panelGrid columns="1">
+                        <h3>Lagerplätze</h3>
+                        <h:dataTable value="#{storeRepository.all}" var="store">
+                            <h:column>
+                                <f:facet name="header">Store ID</f:facet>
+                                #{store.storeId}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Store Adresse</f:facet>
+                                #{store.address.address}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Anzahl Lagerplätze</f:facet>
+                                <h:panelGrid columns="1">
+                                    <h:inputText id="numInventories" p:required="true" p:type="number" p:min="1"
+                                                 required="true"
+                                                 requiredMessage="Bitte Lagerplätze angeben" validatorMessage="Es muss mindestens ein Lageplatz existieren"
+                                                 value="#{addFilmBean.storeToNumInventories[store]}" converter="inventorySizeConverter">
+                                        <f:validateLongRange minimum="1"/>
+                                    </h:inputText>
+                                    <h:message for="numInventories" styleClass="validation-error"/>
+                                </h:panelGrid>
+                            </h:column>
+                        </h:dataTable>
+                    </h:panelGrid>
+                    <h:commandButton value="Speichern" action="#{addFilmBean.saveFilm()}"/>
+                </h:form>
+            </main>
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>

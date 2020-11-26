@@ -1,0 +1,23 @@
+version: '3.5'
+services:
+  db_production:
+    build: ./postgres
+    ports:
+    - 5432:5432
+    networks:
+      - dvdrental
+  web:
+    build: ./wildfly
+    ports:
+      - 8080:8080
+      - 9990:9990
+    volumes:
+      - ./wildfly/deployments:/opt/jboss/wildfly/standalone/deployments/
+    depends_on:
+      - db_production
+    networks:
+      - dvdrental
+networks:
+  dvdrental:
+    name: dvdrental
+

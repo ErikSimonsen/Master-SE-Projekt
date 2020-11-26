@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
+<h:head>
+</h:head>
+<h:body>
+    <ui:composition template="/WEB-INF/template/template.xhtml">
+        <f:metadata>
+          <f:viewAction action="#{sessionBean.checkForLogin()}"/>
+        </f:metadata>
+
+        <ui:define name="head">
+            <ui:include src="WEB-INF/template/head.xhtml"/>
+            <ui:include src="WEB-INF/template/head-list-views.xhtml"/>
+        </ui:define>
+
+        <ui:define name="content">
+            <main>
+                <h3>Filmausleihen: Kundenauswahl</h3>
+                <h:form>
+
+                    <div id="filter" class="flex-row-container">
+                        <div>
+                            <h:outputLabel>Kundennummer</h:outputLabel>
+                            <h:inputText id="customerSearch" p:maxlength="60" p:placeholder="Kundennummer oder Name"
+                                         value="#{customerBean.filter.idName}">
+                                <f:ajax listener="#{customerBean.refreshDataResetPage}" onevent="toggleLoading"
+                                        render="customers-form customerSearchMsg" event="change"/>
+                            </h:inputText>
+                        </div>
+                        <div>
+                            <h:outputLabel>Postleitzahl</h:outputLabel>
+                            <h:inputText id="plz" p:max="99999" p:type="number" p:placeholder="Postleitzahl"
+                                         value="#{customerBean.filter.plz}"
+                                         converter="javax.faces.Integer"
+                                         converterMessage="Bitte geben Sie eine Zahl kleiner als 99.999 an">
+                                <f:ajax listener="#{customerBean.refreshDataResetPage}" onevent="toggleLoading"
+                                        render="customers-form plzMsg" event="change"/>
+                            </h:inputText>
+                        </div>
+                        <div>
+                            <h:outputLabel>Land</h:outputLabel>
+                            <h:selectOneMenu id="country" value="#{customerBean.filter.country}"
+                                             converter="countryConverter">
+                                <f:selectItem itemLabel="Bitte auswählen" itemValue="#{null}"/>
+                                <f:selectItems value="#{countryRepository.all}" var="country"
+                                               itemValue="#{country}" itemLabel="#{country.country}"/>
+                                <f:ajax listener="#{customerBean.refreshDataResetPage}" onevent="toggleLoading"
+                                        render="customers-form countryMsg" event="change"/>
+                            </h:selectOneMenu>
+                        </div>
+
+                        <div id="filter-loading">
+                            <h:graphicImage library="images" height="45" width="45" name="loading_black.gif"/>
+                        </div>
+                    </div>
+                    <div>
+                        <div>
+                            <h:message id="customerSearchMsg" for="customerSearch" styleClass="validation-error"/>
+                        </div>
+                        <div>
+                            <h:message id="plzMsg" for="plz" styleClass="validation-error"/>
+                        </div>
+                        <div>
+                            <h:message id="countryMsg" for="country" styleClass="validation-error"/>
+                        </div>
+                    </div>
+                </h:form>
+                <h:form id="customers-form">
+                    <div id="scrollable-container">
+                        <h:dataTable var="customerList" styleClass="scroll" value="#{customerBean.content}"
+                                     id="customerTable">
+                            <h:column>
+                                <f:facet name="header">
+                                    <!--First set specific SortingField, then select Data (with currentFilters and Sorting) and recalculate number of pages,
+                                     and after this change the sort mode of the sorting field , so that after is sorts asc it afterwards sorts desc-
+                                    Order: setPropertyActionListener -> actionListener -> commandLink -->
+                                    <h:commandLink value="Kundennummer"
+                                                   action="#{customerBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{customerBean.filter.sortingField}"
+                                                                     value="#{customerBean.idSort}"/>
+                                        <f:actionListener binding="#{customerBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="customers-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{customerList.id}
+                            </h:column>
+
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Name"
+                                                   action="#{customerBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{customerBean.filter.sortingField}"
+                                                                     value="#{customerBean.nameSort}"/>
+                                        <f:actionListener binding="#{customerBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="customers-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{customerList.name}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Adresse"
+                                                   action="#{customerBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{customerBean.filter.sortingField}"
+                                                                     value="#{customerBean.addressSort}"/>
+                                        <f:actionListener binding="#{customerBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="customers-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{customerList.address}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="PLZ"
+                                                   action="#{customerBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{customerBean.filter.sortingField}"
+                                                                     value="#{customerBean.zipSort}"/>
+                                        <f:actionListener binding="#{customerBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="customers-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{customerList.zipCode}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="City"
+                                                   action="#{customerBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{customerBean.filter.sortingField}"
+                                                                     value="#{customerBean.citySort}"/>
+                                        <f:actionListener binding="#{customerBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="customers-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{customerList.city}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Land"
+                                                   action="#{customerBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{customerBean.filter.sortingField}"
+                                                                     value="#{customerBean.countrySort}"/>
+                                        <f:actionListener binding="#{customerBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="customers-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{customerList.country}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Status"
+                                                   action="#{customerBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{customerBean.filter.sortingField}"
+                                                                     value="#{customerBean.notesSort}"/>
+                                        <f:actionListener binding="#{customerBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="customers-form"/>
+
+                                    </h:commandLink>
+                                </f:facet>
+                                <h:graphicImage library="images" title="Kunde aktiv" width="28" height="28"
+                                                name="ok-48.png"
+                                                rendered="#{customerList.notes.equals('active')}"/>
+                                <h:graphicImage library="images" title="Kunde inaktiv" width="28" height="28"
+                                                name="stornieren-48.png"
+                                                rendered="#{!customerList.notes.equals('active')}"/>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Kundenauswahl</f:facet>
+                                <h:button value="auswählen" outcome="filmRentalPage2">
+                                    <f:param name="customerid" value="#{customerList.id}"/>
+                                </h:button>
+                            </h:column>
+                        </h:dataTable>
+                    </div>
+                    <!--The action listener always gets executed first, so first increment the page counter then retrieve the new data,
+                    dont reset the page counter here (like at the top  input and select fields)-->
+                    <h:commandButton value="Zurück" action="#{customerBean.refreshData}"
+                                     actionListener="#{customerBean.previousPage}"
+                                     rendered="#{customerBean.renderPrevBtn}"/>
+
+                    <h:selectOneMenu id="page-select" value="#{customerBean.currentPage}"
+                                     converter="javax.faces.Integer">
+                        <f:selectItems value="#{customerBean.pages}"/>
+                        <!--render whole form, so that the command buttons are rendered too (because they are not in the data table)-->
+                        <f:ajax listener="#{customerBean.refreshData}" render="customers-form"/>
+                    </h:selectOneMenu>
+
+                    <!--The action listener always gets executed first, so first increment the page counter then retrieve the new data-->
+                    <h:commandButton value="Weiter" action="#{customerBean.refreshData}"
+                                     actionListener="#{customerBean.nextPage}"
+                                     rendered="#{customerBean.renderNextBtn}"/>
+                </h:form>
+            </main>
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>

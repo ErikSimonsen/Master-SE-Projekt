@@ -1,0 +1,70 @@
+header {
+    background-color: #232f3e;
+}
+
+nav a {
+    color: white;
+}
+
+a:visited {
+    color: white;
+}
+
+a:hover {
+    color: #bf6000;
+    cursor: pointer;
+}
+
+/*
+* Style Navigation
+*/
+nav {
+    color: white;
+    width: 1024px;
+    margin: auto;
+    height: 50px;
+}
+
+nav {
+    display: flex;
+    flex-direction: row;
+    align-items: center; /*vertical center*/
+    font-weight: bold;
+}
+
+nav div {
+    flex: 1;
+    line-height: 35px;
+    position: relative; /*essential, because position:absolute always aligns to the container div if that has position:relative, otherwise it will align to the document (außerhalb des Elementflusses)*/
+}
+
+nav div.dropdown-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+nav div.dropdown-hint img {
+    margin-left: 3px;
+}
+
+nav div.dropdown:hover > div.dropdown-content {
+    display: block;
+}
+
+nav div.dropdown-content {
+    display: none;
+}
+
+nav div.dropdown-content {
+    width: 100%;
+    text-align: center;
+    position: absolute;
+
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #232f3e;
+
+    border-top: 1px solid white;
+    box-sizing: border-box;
+}

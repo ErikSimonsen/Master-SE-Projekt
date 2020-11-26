@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+</h:head>
+<h:body>
+    <ui:composition template="WEB-INF/template/template.xhtml">
+        <f:metadata>
+            <f:viewAction action="#{sessionBean.checkForLogin()}"/>
+        </f:metadata>
+        <ui:define name="head">
+            <ui:include src="WEB-INF/template/head.xhtml"/>
+            <ui:include src="WEB-INF/template/head-list-views.xhtml"/>
+        </ui:define>
+        <ui:define name="content">
+            <main>
+                <h3>Mitarbeiterübersicht</h3>
+                <h:form>
+                    <div id="filter" class="flex-row-container">
+                    </div>
+                </h:form>
+                <h:form id="staff-form">
+                    <div id="scrollable-container">
+                        <h:dataTable var="staff" styleClass="scroll" value="#{staffBean.staffs}"
+                                     id="staffTable">
+                            <h:column>
+                                <f:facet name="header">
+                                    Mitarbeiternummer
+                                </f:facet>
+                                #{staff.id}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Vorname
+                                </f:facet>
+                                #{staff.firstName}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Nachname
+                                </f:facet>
+                                #{staff.lastName}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    E-Mail
+                                </f:facet>
+                                #{staff.email}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Filiale
+                                </f:facet>
+                                #{staff.storeId}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Aktiv
+                                </f:facet>
+                                <h:graphicImage library="images" title="Mitarbeiter aktiv" width="28" height="28"
+                                                name="ok-48.png"
+                                                rendered="#{staff.active}"/>
+                                <h:graphicImage library="images" title="Mitarbeiter inaktiv" width="28" height="28"
+                                                name="stornieren-48.png"
+                                                rendered="#{!staff.active}"/>
+                            </h:column>
+                        </h:dataTable>
+                    </div>
+                </h:form>
+            </main>
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>

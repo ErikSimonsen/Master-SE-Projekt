@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
+<h:head>
+</h:head>
+<h:body>
+    <ui:composition template="/WEB-INF/template/template.xhtml">
+        <f:metadata>
+            <f:viewAction action="#{sessionBean.checkForLogin()}"/>
+        </f:metadata>
+
+        <ui:define name="head">
+            <ui:include src="WEB-INF/template/head.xhtml"/>
+            <ui:include src="WEB-INF/template/head-list-views.xhtml"/>
+        </ui:define>
+
+        <ui:define name="content">
+            <main>
+                <h3>Filmverwaltung</h3>
+                <h:form>
+                    <div id="filter" class="flex-row-container">
+                        <div>
+                            <h:inputText id="filmSearch" p:maxlength="80" p:placeholder="Filmnummer oder Titel"
+                                         value="#{filmBean.search}">
+                                <f:ajax listener="#{filmBean.onSearchChange}" onevent="toggleLoading"
+                                        render="films-form filmSearchMsg" event="keyup"/>
+                            </h:inputText>
+                            <div id="filter-loading">
+                                <h:graphicImage library="images" height="45" width="45" name="loading_black.gif"/>
+                            </div>
+                        </div>
+                        <div>
+                            <div>
+                                <h:message id="filmSearchMsg" for="filmSearch" styleClass="validation-error"/>
+                            </div>
+                        </div>
+                    </div>
+                </h:form>
+                <h:form id="films-form">
+                    <div id="scrollable-container">
+                        <h:dataTable var="film" styleClass="scroll" value="#{filmBean.films}"
+                                     id="filmTable">
+                            <h:column>
+                                <f:facet name="header">
+                                    Film ID
+                                </f:facet>
+                                #{film.id}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Titel
+                                </f:facet>
+                                #{film.title}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Erscheinungsjahr
+                                </f:facet>
+                                #{film.releaseYear}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Länge
+                                </f:facet>
+                                #{film.length}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Bewertung
+                                </f:facet>
+                                #{film.rating}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Leihdauer (Tage)
+                                </f:facet>
+                                #{film.rentalDuration}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Leihrate
+                                </f:facet>
+                                #{film.rentalRate}$
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Wiederbeschaffungskosten
+                                </f:facet>
+                                #{film.replacementCost}$
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Aktionen
+                                </f:facet>
+
+                                <h:link styleClass="editImg" outcome="editFilm?faces-redirect=true">
+                                    <h:graphicImage library="images" title="Film editieren" width="28" height="28"
+                                                    name="bleistift-48.png"/>
+                                    <f:param name="filmId" value="#{film.id}"/>
+                                </h:link>
+                            </h:column>
+                        </h:dataTable>
+                    </div>
+                    <h:commandButton value="Zurück" action="#{filmBean.refreshFilms}"
+                                     rendered="#{filmBean.currentPage gt 1}">
+                        <f:ajax listener="#{filmBean.previousPage}" render="films-form"/>
+                    </h:commandButton>
+                    <h:selectOneMenu id="page-select" value="#{filmBean.currentPage}" converter="javax.faces.Integer">
+                        <f:selectItems value="#{filmBean.pages}"/>
+                        <!--render whole form, so that the command buttons are rendered too (because they are not in the data table)-->
+                        <f:ajax listener="#{filmBean.refreshFilms}" render="films-form"/>
+                    </h:selectOneMenu>
+                    <!--The action listener always gets executed first, so first increment the page counter then retrieve the new data-->
+                    <h:commandButton value="Weiter" action="#{filmBean.refreshFilms}"
+                                     rendered="#{filmBean.currentPage lt (filmBean.pages.size())}">
+                        <f:ajax listener="#{filmBean.nextPage}" render="films-form"/>
+                    </h:commandButton>
+                </h:form>
+            </main>
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>

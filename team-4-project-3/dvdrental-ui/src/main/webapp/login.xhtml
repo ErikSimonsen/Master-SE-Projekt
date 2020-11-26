@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
+<h:head>
+    <!--This requires that there  is a /resources folder in /webapp and inside there is a /css folder-->
+    <h:outputStylesheet library="css" name="global.css"/>
+    <h:outputStylesheet library="css" name="login.css"/>
+</h:head>
+<h:body>
+    <f:metadata>
+        <f:viewAction action="#{loginBean.checkStaffSession()}"/>
+    </f:metadata>
+    <main>
+        <h:outputText rendered="#{!sessionBean.getStoreClientAvailable()}" value="Leider ist momentan keine Anmeldung möglich,
+da der Service nicht erreicht werden kann"/>
+        <h:form rendered="#{sessionBean.getStoreClientAvailable()}" styleClass="align-center">
+            <h1>Mitarbeiter-Login</h1>
+            <div class="validation-error">
+                <h:message id="selectStaffMsg" for="selectStaff"/>
+            </div>
+            <!--If the converter method getAsObject returns null the required message will display-->
+            <!--p:required is used for the client-side validation that is provided by the browser. p:required is a passtrough attribute, which means it operates directly on the html, it
+            the html attribute "required" to true for the native <select> element. The browser validation highlights the select element, when an <option> is selected,
+            that does not have a "value" attribute. The required="true" is used for serverside validation (look at previous comment), and is needed because you can simply
+            deactivate the client side validation by editing the html and removing the "required"-attribute of the <select>.-->
+            <h:selectOneMenu id="selectStaff" value="#{loginBean.selectedStaff}" converter="staffConverter"
+                             p:required="true" required="true"
+                             requiredMessage="Bitte wählen Sie Ihren Namen aus der Liste aus">
+                <f:selectItem itemLabel="Bitte auswählen" itemValue="#{null}"/>
+                <f:selectItems value="#{storeClient.allStaffs}" var="staff" itemValue="#{staff}"
+                               itemLabel="#{staff.username}"/>
+            </h:selectOneMenu>
+            <!--First login user, and after that navigate to the application-->
+            <h:commandButton value="Einloggen" action="#{loginBean.logIn()}"/>
+        </h:form>
+    </main>
+</h:body>
+</html>

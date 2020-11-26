@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
+<h:head>
+</h:head>
+<h:body>
+    <ui:composition template="WEB-INF/template/template.xhtml">
+        <f:metadata>
+            <f:viewAction action="#{sessionBean.checkForLogin()}"/>
+        </f:metadata>
+        <ui:define name="head">
+            <ui:include src="WEB-INF/template/head.xhtml"/>
+            <ui:include src="WEB-INF/template/head-list-views.xhtml"/>
+        </ui:define>
+        <ui:define name="content">
+            <main>
+                <h3>Ausleihenverwaltung</h3>
+                <h:form>
+                    <div id="filter" class="flex-row-container">
+                        <div>
+                            <h:outputLabel for="titleSearch">Filmtitel</h:outputLabel>
+                            <h:inputText id="titleSearch" p:maxlength="40" p:placeholder="Titel oder Filmnummer"
+                                         value="#{rentalBean.filter.filmTitle}">
+                                <f:ajax listener="#{rentalBean.refreshDataResetPage}" onevent="toggleLoading"
+                                        render="customers-form titleMsg" event="change"/>
+                            </h:inputText>
+                        </div>
+                        <div>
+                            <h:outputLabel for="customerSearch">Kundennummer</h:outputLabel>
+                            <h:inputText id="customerSearch" p:placeholder="Kundennummer" p:type="number" p:min="0"
+                                         value="#{rentalBean.filter.customerId}"
+                                         converter="javax.faces.Integer"
+                                         converterMessage="Bitte geben Sie eine Zahl an">
+                                <f:ajax listener="#{rentalBean.refreshDataResetPage}" onevent="toggleLoading"
+                                        render="customers-form customerSearchMsg" event="change"/>
+                            </h:inputText>
+                        </div>
+                        <div>
+                            <h:outputLabel for="rentalDateFrom">Ausgeliehen</h:outputLabel>
+                            <h:inputText id="rentalDateFrom" p:placeholder="01.01.2005"
+                                         value="#{rentalBean.filter.dateFrom}"
+                                         converterMessage="Bitte geben Sie ein Datum der Form dd.MM.yyyy an">
+                                <f:convertDateTime type="date" pattern="dd.MM.yyyy"/>
+                                <f:ajax listener="#{rentalBean.refreshDataResetPage}" onevent="toggleLoading"
+                                        render="customers-form rentalDateFromMsg" event="blur"/>
+                            </h:inputText>
+                        </div>
+                        <div>
+                            <h:outputLabel for="rentalDateTo">Bis</h:outputLabel>
+                            <h:inputText id="rentalDateTo" p:placeholder="01.01.2006"
+                                         value="#{rentalBean.filter.dateTo}"
+                                         converterMessage="Bitte geben Sie ein Datum der Form dd.MM.yyyy an">
+                                <f:convertDateTime type="date" pattern="dd.MM.yyyy"/>
+                                <f:ajax listener="#{rentalBean.refreshDataResetPage}" onevent="toggleLoading"
+                                        render="customers-form rentalDateToMsg" event="change"/>
+                            </h:inputText>
+                        </div>
+                        <div>
+                            <h:outputLabel for="rentalStatus">Zurückgegeben</h:outputLabel>
+                            <h:selectOneMenu id="rentalStatus" value="#{rentalBean.filter.returned}">
+                                <f:selectItem value="#{null}" itemLabel="Alle"/>
+                                <f:selectItems value="#{rentalBean.returned}"/>
+                                <f:ajax listener="#{rentalBean.refreshDataResetPage}" onevent="toggleLoading"
+                                        render="customers-form" event="change"/>
+                            </h:selectOneMenu>
+                        </div>
+                        <div id="filter-loading">
+                            <h:graphicImage library="images" height="45" width="45" name="loading_black.gif"/>
+                        </div>
+                    </div>
+                    <div>
+                        <div>
+                            <h:message id="titleMsg" for="titleSearch" styleClass="validation-error"/>
+                        </div>
+                        <div>
+                            <h:message id="customerSearchMsg" for="customerSearch" styleClass="validation-error"/>
+                        </div>
+                        <div>
+                            <h:message id="rentalDateFromMsg" for="rentalDateFrom" styleClass="validation-error"/>
+                        </div>
+                        <div>
+                            <h:message id="rentalDateToMsg" for="rentalDateTo" styleClass="validation-error"/>
+                        </div>
+                    </div>
+                </h:form>
+                <h:form id="customers-form">
+                    <div id="scrollable-container">
+                        <h:dataTable var="rental" styleClass="scroll" value="#{rentalBean.content}"
+                                     id="rentalTable">
+                            <h:column>
+                                <f:facet name="header">
+                                    <!--First set specific SortingField, then select Data (with currentFilters and Sorting) and recalculate number of pages,
+                                     and after this change the sort mode of the sorting field , so that after is sorts asc it afterwards sorts desc-
+                                    Order: setPropertyActionListener -> actionListener -> commandLink -->
+                                    <h:commandLink value="Ausleihennummer"
+                                                   action="#{rentalBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{rentalBean.filter.sortingField}"
+                                                                     value="#{rentalBean.idSort}"/>
+                                        <f:actionListener binding="#{rentalBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="customers-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{rental.rentalId}
+                            </h:column>
+
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Filmnummer"
+                                                   action="#{rentalBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{rentalBean.filter.sortingField}"
+                                                                     value="#{rentalBean.filmIdSort}"/>
+                                        <f:actionListener binding="#{rentalBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="customers-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{rental.inventory.film.filmId}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Filmname"
+                                                   action="#{rentalBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{rentalBean.filter.sortingField}"
+                                                                     value="#{rentalBean.filmNameSort}"/>
+                                        <f:actionListener binding="#{rentalBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="customers-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{rental.inventory.film.title}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Kundennummer"
+                                                   action="#{rentalBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{rentalBean.filter.sortingField}"
+                                                                     value="#{rentalBean.customerIdSort}"/>
+                                        <f:actionListener binding="#{rentalBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="customers-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{rental.customer.customerId}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Zu zahlen"
+                                                   action="#{rentalBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{rentalBean.filter.sortingField}"
+                                                                     value="#{rentalBean.rentalPriceSort}"/>
+                                        <f:actionListener binding="#{rentalBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="customers-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{customerRentalsService.getCosts(rental)}$
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Ausgeliehen"
+                                                   action="#{rentalBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{rentalBean.filter.sortingField}"
+                                                                     value="#{rentalBean.rentalDateSort}"/>
+                                        <f:actionListener binding="#{rentalBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="customers-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                <h:outputText value="#{rental.rentalDate}">
+                                    <f:convertDateTime type="date" dateStyle="medium"/>
+                                </h:outputText>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Zurückgegeben"
+                                                   action="#{rentalBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{rentalBean.filter.sortingField}"
+                                                                     value="#{rentalBean.returnDateSort}"/>
+                                        <f:actionListener binding="#{rentalBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="customers-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                <h:outputText value="#{rental.returnDate}"
+                                              rendered="#{rental.returnDate != null}">
+                                    <f:convertDateTime type="date" dateStyle="medium"/>
+                                </h:outputText>
+                                <h:outputText styleClass="validation-error" value="-----------"
+                                              rendered="#{rental.returnDate == null}"/>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Bezahlt
+                                </f:facet>
+                                <h:graphicImage library="images" name="ok-48.png" width="28" height="28"
+                                                rendered="#{customerRentalsService.isPaid(rental)}"/>
+                                <h:graphicImage library="images" name="stornieren-48.png" width="28" height="28"
+                                                rendered="#{!customerRentalsService.isPaid(rental)}"/>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Aktionen
+                                </f:facet>
+                                <h:link styleClass="actionImg" outcome="customerRentals">
+                                    <h:graphicImage library="images" title="Kundenausleihen ansehen" width="28" height="28"
+                                                    name="file-invoice-48.png"/>
+                                    <f:param name="customerid" value="#{rental.customer.customerId}"/>
+                                </h:link>
+                            </h:column>
+                        </h:dataTable>
+                    </div>
+                    <!--The action listener always gets executed first, so first increment the page counter then retrieve the new data,
+                    dont reset the page counter here (like at the top  input and select fields)-->
+                    <h:commandButton value="Zurück" action="#{rentalBean.refreshData}"
+                                     rendered="#{rentalBean.renderPrevBtn}">
+                        <f:ajax listener="#{rentalBean.previousPage}" render="customers-form"/>
+                    </h:commandButton>
+
+                    <h:selectOneMenu id="page-select" value="#{rentalBean.currentPage}" converter="javax.faces.Integer">
+                        <f:selectItems value="#{rentalBean.pages}"/>
+                        <!--render whole form, so that the command buttons are rendered too (because they are not in the data table)-->
+                        <f:ajax listener="#{rentalBean.refreshData}" render="customers-form"/>
+                    </h:selectOneMenu>
+
+                    <!--The action listener always gets executed first, so first increment the page counter then retrieve the new data-->
+                    <h:commandButton value="Weiter" action="#{rentalBean.refreshData}"
+                                     rendered="#{rentalBean.renderNextBtn}">
+                        <f:ajax listener="#{rentalBean.nextPage}" render="customers-form"/>
+                    </h:commandButton>
+                </h:form>
+            </main>
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>

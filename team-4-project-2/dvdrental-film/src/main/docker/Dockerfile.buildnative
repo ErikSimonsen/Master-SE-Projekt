@@ -1,0 +1,14 @@
+# stolen from https://quarkus.io/guides/building-native-image
+# run with docker run -it --name build_native -v :/usr/src/app/target -v /D/Uni/sep/sprint2/sep-ss2020-team-4-project-2/dvdrental-film/src:/usr/src/app/src --network native --rm build-native
+# ATTENTION: .dockerignore file needs to be deleted or everything inside needs to be uncomment
+# ATTENTION: The test database needs to be in the same network (name "native") and the name of the container needs to be db
+FROM quay.io/quarkus/centos-quarkus-maven:19.3.1-java11
+ENV QUARKUS_DATASOURCE_JDBC_URL jdbc:postgresql://db:5432/dvdrentalfilm
+ENV QUARKUS_SWAGGER_UI_ALWAYS_INCLUDE true
+COPY src /usr/src/app/src
+COPY pom.xml /usr/src/app
+USER root
+RUN chown -R quarkus /usr/src/app
+USER quarkus
+RUN mvn -f /usr/src/app/pom.xml dependency:resolve
+CMD ["mvn", "-f", "/usr/src/app/pom.xml", "-Pnative", "package"]

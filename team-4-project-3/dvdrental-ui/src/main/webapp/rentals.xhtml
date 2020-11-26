@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
+<h:head>
+</h:head>
+<h:body>
+    <ui:composition template="WEB-INF/template/template.xhtml">
+        <f:metadata>
+            <f:viewAction action="#{sessionBean.checkForLogin()}"/>
+        </f:metadata>
+        <ui:define name="head">
+            <ui:include src="WEB-INF/template/head.xhtml"/>
+            <ui:include src="WEB-INF/template/head-list-views.xhtml"/>
+        </ui:define>
+        <ui:define name="content">
+            <main>
+                <h3>Ausleihenverwaltung</h3>
+                <h:form>
+                    <div id="filter" class="flex-row-container">
+                        <div>
+                            <h:inputText id="rentalSearch" p:maxlength="80"
+                                         p:placeholder="Ausleihennummer oder Kundennummer"
+                                         value="#{rentalBean.search}">
+                                <f:ajax listener="#{rentalBean.onSearchChange}" onevent="toggleLoading"
+                                        render="rentals-form rentalSearchMsg" event="keyup"/>
+                            </h:inputText>
+                            <div id="filter-loading">
+                                <h:graphicImage library="images" height="45" width="45" name="loading_black.gif"/>
+                            </div>
+                        </div>
+                        <div>
+                            <div>
+                                <h:message id="rentalSearchMsg" for="rentalSearch" styleClass="validation-error"/>
+                            </div>
+                        </div>
+                    </div>
+                </h:form>
+                <h:form id="rentals-form">
+                    <div id="scrollable-container">
+                        <h:dataTable var="rental" styleClass="scroll" value="#{rentalBean.rentals}"
+                                     id="rentalTable">
+                            <h:column>
+                                <f:facet name="header">
+                                    Ausleihennummer
+                                </f:facet>
+                                #{rental.rentalId}
+                            </h:column>
+
+                            <h:column>
+                                <f:facet name="header">
+                                    Filmnummer
+                                </f:facet>
+                                #{rentalBean.getRentalFilm(rental).id}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Filmname
+                                </f:facet>
+                                #{rentalBean.getRentalFilm(rental).title}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Kundennummer
+                                </f:facet>
+                                #{rentalBean.getRentalCustomer(rental).id}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Zu zahlen
+                                </f:facet>
+                                #{customerRentalsService.getCosts(rental, rentalBean.getRentalFilm(rental))}$
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Ausgeliehen
+                                </f:facet>
+                                <h:outputText value="#{rental.rentalDate}">
+                                    <f:convertDateTime type="date" dateStyle="medium"/>
+                                </h:outputText>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Zurückgegeben
+                                </f:facet>
+                                <h:outputText value="#{rental.returnDate}"
+                                              rendered="#{rental.returnDate != null}">
+                                    <f:convertDateTime type="date" dateStyle="medium"/>
+                                </h:outputText>
+                                <h:outputText styleClass="validation-error" value="-----------"
+                                              rendered="#{rental.returnDate == null}"/>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Bezahlt
+                                </f:facet>
+                                <h:graphicImage library="images" name="ok-48.png" width="28" height="28"
+                                                rendered="#{customerRentalsService.isPaid(rental, rentalBean.getRentalFilm(rental))}"/>
+                                <h:graphicImage library="images" name="stornieren-48.png" width="28" height="28"
+                                                rendered="#{!customerRentalsService.isPaid(rental, rentalBean.getRentalFilm(rental))}"/>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Aktionen
+                                </f:facet>
+                                <h:link styleClass="actionImg" outcome="customerRentals">
+                                    <h:graphicImage library="images" title="Kundenausleihen ansehen" width="28"
+                                                    height="28"
+                                                    name="file-invoice-48.png"/>
+                                    <f:param name="customerId" value="#{rentalBean.getRentalCustomer(rental).id}"/>
+                                </h:link>
+                            </h:column>
+                        </h:dataTable>
+                    </div>
+                    <!--The action listener always gets executed first, so first increment the page counter then retrieve the new data,
+                    dont reset the page counter here (like at the top  input and select fields)-->
+                    <h:commandButton value="Zurück" action="#{rentalBean.refreshRentals}"
+                                     rendered="#{rentalBean.currentPage gt 1}">
+                        <f:ajax listener="#{rentalBean.previousPage}" render="rentals-form"/>
+                    </h:commandButton>
+                    <h:selectOneMenu id="page-select" value="#{rentalBean.currentPage}" converter="javax.faces.Integer">
+                        <f:selectItems value="#{rentalBean.pages}"/>
+                        <!--render whole form, so that the command buttons are rendered too (because they are not in the data table)-->
+                        <f:ajax listener="#{rentalBean.refreshRentals}" render="rentals-form"/>
+                    </h:selectOneMenu>
+                    <!--The action listener always gets executed first, so first increment the page counter then retrieve the new data-->
+                    <h:commandButton value="Weiter" action="#{rentalBean.refreshRentals}"
+                                     rendered="#{rentalBean.currentPage lt (rentalBean.pages.size())}">
+                        <f:ajax listener="#{rentalBean.nextPage}" render="rentals-form"/>
+                    </h:commandButton>
+                </h:form>
+            </main>
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>

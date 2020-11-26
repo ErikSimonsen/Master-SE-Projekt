@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+</h:head>
+<h:body>
+    <ui:composition template="WEB-INF/template/template.xhtml">
+        <f:metadata>
+            <f:viewAction action="#{sessionBean.checkForLogin()}"/>
+            <f:viewAction action="#{sessionBean.checkForStoreOwner()}"/>
+        </f:metadata>
+        <ui:define name="head">
+            <ui:include src="WEB-INF/template/head.xhtml"/>
+            <ui:include src="WEB-INF/template/head-list-views.xhtml"/>
+        </ui:define>
+        <ui:define name="content">
+            <main>
+                <h3>Mitarbeiterverwaltung</h3>
+                <h:form>
+                    <div id="filter" class="flex-row-container">
+                    </div>
+                </h:form>
+                <h:form id="staff-form">
+                    <div id="scrollable-container">
+                        <h:dataTable var="staffList" styleClass="scroll" value="#{staffBean.content}"
+                                     id="staffTable">
+                            <h:column>
+                                <f:facet name="header">
+                                    <!--First set specific SortingField, then select Data (with currentFilters and Sorting) and recalculate number of pages,
+                                     and after this change the sort mode of the sorting field , so that after is sorts asc it afterwards sorts desc-
+                                    Order: setPropertyActionListener -> actionListener -> commandLink -->
+                                    <h:commandLink value="Mitarbeiternummer"
+                                                   action="#{staffBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{staffBean.filter.sortingField}"
+                                                                     value="#{staffBean.idSort}"/>
+                                        <f:actionListener binding="#{staffBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="staff-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{staffList.staffId}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Vorname"
+                                                   action="#{staffBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{staffBean.filter.sortingField}"
+                                                                     value="#{staffBean.firstNameSort}"/>
+                                        <f:actionListener binding="#{staffBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="staff-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{staffList.firstName}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Nachname"
+                                                   action="#{staffBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{staffBean.filter.sortingField}"
+                                                                     value="#{staffBean.lastNameSort}"/>
+                                        <f:actionListener binding="#{staffBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="staff-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{staffList.lastName}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Email"
+                                                   action="#{staffBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{staffBean.filter.sortingField}"
+                                                                     value="#{staffBean.emailSort}"/>
+                                        <f:actionListener binding="#{staffBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="staff-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{staffList.email}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Filiale"
+                                                   action="#{staffBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{staffBean.filter.sortingField}"
+                                                                     value="#{staffBean.storeSort}"/>
+                                        <f:actionListener binding="#{staffBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="staff-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{staffList.store.storeId}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Aktiv"
+                                                   action="#{staffBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{staffBean.filter.sortingField}"
+                                                                     value="#{staffBean.statusSort}"/>
+                                        <f:actionListener binding="#{staffBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="staff-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                <h:graphicImage library="images" title="Mitarbeiter aktiv" width="28" height="28"
+                                                name="ok-48.png"
+                                                rendered="#{staffList.active}"/>
+                                <h:graphicImage library="images" title="Mitarbeiter inaktiv" width="28" height="28"
+                                                name="stornieren-48.png"
+                                                rendered="#{!staffList.active}"/>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Aktionen
+                                </f:facet>
+                                <h:link styleClass="actionImg" outcome="editStaff">
+                                    <h:graphicImage library="images" title="Mitarbeiter editieren" width="28"
+                                                    height="28"
+                                                    name="bleistift-48.png"/>
+                                    <f:param name="staffId" value="#{staffList.staffId}"/>
+                                </h:link>
+                            </h:column>
+                        </h:dataTable>
+                    </div>
+                    <!--The action listener always gets executed first, so first increment the page counter then retrieve the new data,
+                    dont reset the page counter here (like at the top  input and select fields)-->
+                    <h:commandButton value="Zurück" action="#{staffBean.refreshData}"
+                                     rendered="#{staffBean.renderPrevBtn}">
+                        <f:ajax listener="#{staffBean.previousPage}" render="customers-form"/>
+                    </h:commandButton>
+
+                    <h:selectOneMenu id="page-select" value="#{staffBean.currentPage}" converter="javax.faces.Integer">
+                        <f:selectItems value="#{staffBean.pages}"/>
+                        <!--render whole form, so that the command buttons are rendered too (because they are not in the data table)-->
+                        <f:ajax listener="#{staffBean.refreshData}" render="staff-form"/>
+                    </h:selectOneMenu>
+                    <!--The action listener always gets executed first, so first increment the page counter then retrieve the new data-->
+                    <h:commandButton value="Weiter" action="#{staffBean.refreshData}"
+                                     rendered="#{staffBean.renderNextBtn}">
+                        <f:ajax listener="#{staffBean.nextPage}" render="customers-form"/>
+                    </h:commandButton>
+                </h:form>
+            </main>
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>

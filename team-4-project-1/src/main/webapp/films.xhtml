@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://xmlns.jcp.org/jsf/passthrough"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+</h:head>
+<h:body>
+    <ui:composition template="/WEB-INF/template/template.xhtml">
+        <f:metadata>
+            <f:viewAction action="#{sessionBean.checkForLogin()}"/>
+        </f:metadata>
+
+        <ui:define name="head">
+            <ui:include src="WEB-INF/template/head.xhtml"/>
+            <ui:include src="WEB-INF/template/head-list-views.xhtml"/>
+        </ui:define>
+
+        <ui:define name="content">
+            <main>
+                <h3>Filmverwaltung</h3>
+                <h:form>
+                    <div id="filter" class="flex-row-container">
+                        <div>
+                            <h:outputLabel for="titleSearch">Titel</h:outputLabel>
+                            <h:inputText id="titleSearch" p:maxlength="40" p:placeholder="Titel oder Filmnummer"
+                                         value="#{filmBean.filter.filmTitle}">
+                                <f:ajax listener="#{filmBean.refreshDataResetPage}" onevent="toggleLoading"
+                                        render="films-form titleMsg" event="change"/>
+                            </h:inputText>
+                        </div>
+                        <div>
+                            <h:outputLabel for="category">Kategorie</h:outputLabel>
+                            <h:selectOneMenu id="category" value="#{filmBean.filter.filmCategory}"
+                                             converter="categoryConverter">
+                                <f:selectItem value="#{null}" itemLabel="Alle"/>
+                                <f:selectItems value="#{categoryRepository.all}" var="category"
+                                               itemValue="#{category}" itemLabel="#{category.name}"/>
+                                <f:ajax listener="#{filmBean.refreshDataResetPage}" onevent="toggleLoading"
+                                        render="films-form" event="change"/>
+                            </h:selectOneMenu>
+                        </div>
+                        <div>
+
+                            <h:outputLabel for="releaseYearSearch">Erscheinungsjahr</h:outputLabel>
+                            <h:inputText id="releaseYearSearch" p:type="number"
+                                         p:placeholder="Erscheinungsjahr"
+                                         value="#{filmBean.filter.releaseYear}"
+                                         converter="yearConverter">
+                                <f:ajax listener="#{filmBean.refreshDataResetPage}" onevent="toggleLoading"
+                                        render="films-form releaseYearMsg" event="change"/>
+                            </h:inputText>
+                        </div>
+
+                        <div>
+                            <h:outputLabel for="lengthSearch">Länge (in min)</h:outputLabel>
+                            <h:inputText id="lengthSearch" p:type="number" p:max="999" p:min="0"
+                                         p:placeholder="Länge in Minuten"
+                                         value="#{filmBean.filter.length}"
+                                         converter="javax.faces.Short"
+                                         converterMessage="Bitte geben Sie einen Wert kleiner als 999 an">
+                                <f:ajax listener="#{filmBean.refreshDataResetPage}" onevent="toggleLoading"
+                                        render="films-form lengthMsg" event="change"/>
+                            </h:inputText>
+                        </div>
+                        <div>
+                            <h:outputLabel for="rating">Bewertung</h:outputLabel>
+                            <h:selectOneMenu id="rating" value="#{filmBean.filter.rating}">
+                                <f:selectItem value="#{null}" itemLabel="Alle"/>
+                                <f:selectItems value="#{filmBean.ratings}"/>
+                                <f:ajax listener="#{filmBean.refreshDataResetPage}" onevent="toggleLoading"
+                                        render="films-form" event="change"/>
+                            </h:selectOneMenu>
+                        </div>
+                        <div id="filter-loading">
+                            <h:graphicImage library="images" height="45" width="45" name="loading_black.gif"/>
+                        </div>
+                        <!--Serverside validation message, have to explicitly be rendered by the ajax calls-->
+                    </div>
+                    <div>
+                        <div>
+                            <h:message id="titleMsg" for="titleSearch" styleClass="validation-error"/>
+                        </div>
+                        <div>
+                            <h:message id="releaseYearMsg" for="releaseYearSearch" styleClass="validation-error"/>
+                        </div>
+                        <div>
+                            <h:message id="lengthMsg" for="lengthSearch" styleClass="validation-error"/>
+                        </div>
+                    </div>
+                </h:form>
+                <h:form id="films-form">
+                    <div id="scrollable-container">
+                        <h:dataTable var="filmCategory" styleClass="scroll" value="#{filmBean.content}"
+                                     id="filmTable">
+                            <h:column>
+                                <f:facet name="header">
+                                    <!--First set specific SortingField, then select Data (with currentFilters and Sorting) and recalculate number of pages,
+                                     and after this change the sort mode of the sorting field , so that after is sorts asc it afterwards sorts desc-
+                                    Order: setPropertyActionListener -> actionListener -> commandLink -->
+                                    <h:commandLink value="Film Nr."
+                                                   action="#{filmBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{filmBean.filter.sortingField}"
+                                                                     value="#{filmBean.idSort}"/>
+                                        <f:actionListener binding="#{filmBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="films-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{filmCategory.film.filmId}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Titel" action="#{filmBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{filmBean.filter.sortingField}"
+                                                                     value="#{filmBean.titleSort}"/>
+                                        <f:actionListener binding="#{filmBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="films-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{filmCategory.film.title}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Kategorie"
+                                                   action="#{filmBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{filmBean.filter.sortingField}"
+                                                                     value="#{filmBean.categorySort}"/>
+                                        <f:actionListener binding="#{filmBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="films-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{filmCategory.category.name}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Erscheinungsjahr"
+                                                   action="#{filmBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{filmBean.filter.sortingField}"
+                                                                     value="#{filmBean.releaseYearSort}"/>
+                                        <f:actionListener binding="#{filmBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="films-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{filmCategory.film.releaseYear}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Länge" action="#{filmBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{filmBean.filter.sortingField}"
+                                                                     value="#{filmBean.lengthSort}"/>
+                                        <f:actionListener binding="#{filmBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="films-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{filmCategory.film.length}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Bewertung"
+                                                   action="#{filmBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{filmBean.filter.sortingField}"
+                                                                     value="#{filmBean.ratingSort}"/>
+                                        <f:actionListener binding="#{filmBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="films-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{filmCategory.film.rating}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Leihdauer (Tage)"
+                                                   action="#{filmBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{filmBean.filter.sortingField}"
+                                                                     value="#{filmBean.rentalDurationSort}"/>
+                                        <f:actionListener binding="#{filmBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="films-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{filmCategory.film.rentalDuration}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Leihrate"
+                                                   action="#{filmBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{filmBean.filter.sortingField}"
+                                                                     value="#{filmBean.rentalRateSort}"/>
+                                        <f:actionListener binding="#{filmBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="films-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{filmCategory.film.rentalRate}$
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:commandLink value="Wiederbeschaffungskosten"
+                                                   action="#{filmBean.filter.sortingField.toggleSortAsc}">
+                                        <f:setPropertyActionListener target="#{filmBean.filter.sortingField}"
+                                                                     value="#{filmBean.replacementCostSort}"/>
+                                        <f:actionListener binding="#{filmBean.refreshDataResetPage()}"/>
+                                        <f:ajax render="films-form"/>
+                                    </h:commandLink>
+                                </f:facet>
+                                #{filmCategory.film.replacementCost}$
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Aktionen
+                                </f:facet>
+
+                                <h:link styleClass="editImg" outcome="editFilm?faces-redirect=true">
+                                    <h:graphicImage library="images" title="Film editieren" width="28" height="28"
+                                                    name="bleistift-48.png"/>
+                                    <f:param name="filmId" value="#{filmCategory.film.filmId}"/>
+                                </h:link>
+                            </h:column>
+                        </h:dataTable>
+                    </div>
+                    <!--The action listener always gets executed first, so first increment the page counter then retrieve the new data,
+                    dont reset the page counter here (like at the top  input and select fields)-->
+                    <h:commandButton value="Zurück" action="#{filmBean.refreshData}"
+                                     rendered="#{filmBean.renderPrevBtn}">
+                        <f:ajax listener="#{filmBean.previousPage}" render="customers-form"/>
+                    </h:commandButton>
+
+                    <h:selectOneMenu id="page-select" value="#{filmBean.currentPage}" converter="javax.faces.Integer">
+                        <f:selectItems value="#{filmBean.pages}"/>
+                        <!--render whole form, so that the command buttons are rendered too (because they are not in the data table)-->
+                        <f:ajax listener="#{filmBean.refreshData}" render="films-form"/>
+                    </h:selectOneMenu>
+
+                    <!--The action listener always gets executed first, so first increment the page counter then retrieve the new data-->
+                    <h:commandButton value="Weiter" action="#{filmBean.refreshData}"
+                                     rendered="#{filmBean.renderNextBtn}">
+                        <f:ajax listener="#{filmBean.nextPage}" render="customers-form"/>
+                    </h:commandButton>
+                </h:form>
+            </main>
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>

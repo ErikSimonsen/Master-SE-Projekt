@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
+<h:head>
+</h:head>
+<h:body>
+    <ui:composition template="WEB-INF/template/template.xhtml">
+        <f:metadata>
+            <f:viewAction action="#{sessionBean.checkForLogin()}"/>
+            <f:viewParam name="filmId" value="#{editFilmBean.filmUrlId}"
+                         required="false" requiredMessage="Sie müssen eine Filnummmer angeben"
+                         converter="javax.faces.Integer"/>
+            <f:viewAction action="#{editFilmBean.loadFilm()}"/>
+        </f:metadata>
+        <ui:define name="head">
+            <ui:include src="WEB-INF/template/head.xhtml"/>
+            <ui:include src="WEB-INF/template/head-list-views.xhtml"/>
+            <h:outputStylesheet library="css" name="edit-film.css"/>
+        </ui:define>
+        <ui:define name="content">
+            <main>
+                <h3>Neuen Film hinzufügen</h3>
+                <h:form>
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="Titel: " for="title"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="title" p:required="true" required="true"
+                                         value="#{editFilmBean.film.title}"
+                                         requiredMessage="Bitte Filmtitel angeben!"/>
+                            <h:message for="title" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Beschreibung: " for="description"/>
+                        <h:panelGrid columns="1">
+                            <h:inputTextarea id="description" p:required="true" required="true"
+                                             value="#{editFilmBean.film.description}"
+                                             requiredMessage="Bitte Beschreibung angeben!"/>
+                            <h:message for="description" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Veröffentlichungsjahr: " for="releaseYear"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="releaseYear" p:required="true" p:type="number"
+                                         value="#{editFilmBean.film.releaseYear}"
+                                         required="true"
+                                         requiredMessage="Bitte Veröffentlichungsjahr angeben!"
+                                         converter="yearConverter">
+                            </h:inputText>
+                            <h:message for="releaseYear" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Sprache: " for="language"/>
+                        <h:panelGrid columns="1">
+                            <h:selectOneMenu id="language" value="#{editFilmBean.film.language}" required="true"
+                                             p:required="true" requiredMessage="Bitte eine Sprache auswählen"
+                                             converter="languageConverter">
+                                <f:selectItem itemLabel="Bitte auswählen" itemValue="#{null}"/>
+                                <f:selectItems value="#{languageRepository.all}" var="language"
+                                               itemValue="#{language}" itemLabel="#{language.name}"/>
+                            </h:selectOneMenu>
+                            <h:message for="language" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Kategorie: " for="category"/>
+                        <h:panelGrid columns="1">
+                            <h:selectOneMenu id="category" value="#{editFilmBean.film.category}"
+                                             required="true"
+                                             p:required="true" requiredMessage="Bitte eine Kategorie auswählen"
+                                             converter="categoryConverter">
+                                <f:selectItem itemLabel="Bitte auswählen" itemValue="#{null}"/>
+                                <f:selectItems value="#{categoryRepository.all}" var="category"
+                                               itemValue="#{category}" itemLabel="#{category.name}"/>
+                            </h:selectOneMenu>
+                            <h:message for="language" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Schauspieler: " for="actors"/>
+                        <h:panelGrid columns="1">
+                            <!--https://stackoverflow.com/questions/25245426/org-hibernate-lazyinitializationexception-at-com-sun-faces-renderkit-html-basic-->
+                            <h:selectManyMenu id="actors" value="#{editFilmBean.film.actors}" required="true"
+                                              p:required="true"
+                                              requiredMessage="Bitte mindestens einen Schauspieler auswählen"
+                                              converter="actorConverter"
+                                              collectionType="java.util.HashSet">
+                                <f:selectItems value="#{actorRepository.all}" var="actor"
+                                               itemValue="#{actor}" itemLabel="#{actor.firstName} #{actor.lastName}"/>
+                            </h:selectManyMenu>
+                            <h:message for="language" styleClass="validation-error"/>
+                        </h:panelGrid>
+
+                        <h:outputLabel value="Ausleihdauer (in Tagen): " for="rental_duration"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="rental_duration" value="#{editFilmBean.film.rentalDuration}"
+                                         p:type="number" p:required="true" required="true" p:min="0" p:max="999"
+                                         p:placeholder="1"
+                                         requiredMessage="Bitte geben Sie die Ausleihdauer in Tagen an"
+                                         converter="javax.faces.Short"
+                                         converterMessage="Bitte geben Sie eine Ganzzahl"/>
+                            <h:message for="rental_duration" styleClass="validation-error"/>
+                        </h:panelGrid>
+
+                        <h:outputLabel value="Ausleihrate (in Dollar): " for="rental_rate"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="rental_rate" p:required="true" required="true"
+                                         value="#{editFilmBean.film.rentalRate}" p:type="number" p:step="0.01"
+                                         p:placeholder="1.0"
+                                         p:min="0" p:max="50.00" requiredMessage="Bitte Ausleihrate angeben angeben!"
+                                         converter="javax.faces.BigDecimal"
+                                         converterMessage="Bitte geben Sie eine Dezimalzahl an"/>
+                            <h:message for="rental_rate" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Wiederbeschaffungskosten: " for="postalCode"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="postalCode" p:required="true" required="true" p:type="number" p:step="0.01"
+                                         p:min="0" p:max="100.00" p:placeholder="10.00"
+                                         value="#{editFilmBean.film.replacementCost}"
+                                         requiredMessage="Bitte Kosten angeben!" converter="javax.faces.BigDecimal"
+                                         converterMessage="Bitte geben Sie eine Dezimalzahl an"/>
+                            <h:message for="postalCode" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Filmlänge (in Minuten): " for="length"/>
+                        <h:panelGrid columns="1">
+                            <h:inputText id="length" p:required="true" p:min="0" p:max="999" p:type="number"
+                                         required="true"
+                                         value="#{editFilmBean.film.length}"
+                                         converter="javax.faces.Short"
+                                         converterMessage="Bitte geben Sie eine Filmlänge unter 999 Minute an"
+                                         requiredMessage="Bitte Filmlänge angeben!"/>
+                            <h:message for="length" styleClass="validation-error"/>
+                        </h:panelGrid>
+                        <h:outputLabel value="Einstufung: " for="rating"/>
+                        <h:panelGrid columns="1">
+                            <h:selectOneMenu id="rating" p:required="true" required="true"
+                                             requiredMessage="Bitte Einstufung angeben"
+                                             value="#{editFilmBean.film.rating}">
+                                <f:selectItem itemLabel="Bitte auswählen" itemValue="#{null}"/>
+                                <f:selectItems value="#{editFilmBean.ratings}"/>
+                            </h:selectOneMenu>
+                            <h:message for="rating" styleClass="validation-error"/>
+                        </h:panelGrid>
+                    </h:panelGrid>
+                    <h:commandButton value="Speichern" action="#{editFilmBean.update()}"/>
+                </h:form>
+            </main>
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>
